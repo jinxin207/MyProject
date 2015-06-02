@@ -1,7 +1,7 @@
 /******************************************************************************
  *  Copyright Cambridge Silicon Radio Limited 2013-2015
  *  Part of CSR uEnergy SDK 2.4.5
- *  Application version 2.4.5.0
+ *  Application version 2.4.5.0 test
  *
  *  FILE
  *      buzzer.c
