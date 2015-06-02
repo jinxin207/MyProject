@@ -1,0 +1,65 @@
+/******************************************************************************
+ *  Copyright Cambridge Silicon Radio Limited 2013-2015
+ *  Part of CSR uEnergy SDK 2.4.5
+ *  Application version 2.4.5.0
+ *
+ *  FILE
+ *      battery_service_db.db
+ *
+ *  DESCRIPTION
+ *      This file defines the Battery Service in JSON format. This file is 
+ *      included in the main application data base file which is used to 
+ *      produce ATT flat data base.
+ *
+ *****************************************************************************/
+#ifndef __SMART_HOME_SERVICE_DB__
+#define __SMART_HOME_SERVICE_DB__
+
+#include "user_config.h"
+/* For service details, refer http://developer.bluetooth.org/gatt/services/
+ * Pages/ServiceViewer.aspx?u=org.bluetooth.service.battery_service.xml
+ */
+
+/* Primary service declaration of Battery service */
+primary_service {
+    uuid : 0xf014eb1504393000e00100001001ffff,
+    name : "SMART_SERVICE", /* Name will be used in handle name macro */
+
+    /* Battery level characteristic */
+
+    /* Battery Level characteristic supports IRQ flag, thereby reads and writes on 
+     * characteristic value are handled by application.
+     */
+    
+    characteristic {
+        uuid : 0xf014ff0104393000e00100001001ffff,
+        name : "SMART_SENSOR",
+        flags : [FLAG_IRQ],
+        properties : [read, notify],
+        value : 0x00,
+        
+        client_config {
+        flags : [FLAG_IRQ],
+            name : "SMART_SENSOR_C_CFG"
+        }
+            
+    },
+    
+    characteristic {
+        uuid : 0xf014ff0204393000e00100001001ffff,
+        name : "SMART_CONTROL",
+        properties : [read, write],
+        flags : [FLAG_IRQ],
+        value : 0x00
+    },
+    
+    
+    characteristic {
+        uuid : 0xf014ff0304393000e00100001001ffff,
+        name : "SMART_CONFIG",
+        properties : [read, write],
+        flags : [FLAG_IRQ],
+        value : 0x00
+    }      
+}
+#endif /* __SMART_HOME_SERVICE_DB__ */

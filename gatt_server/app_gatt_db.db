@@ -1,0 +1,18 @@
+/******************************************************************************
+ *  Copyright Cambridge Silicon Radio Limited 2013-2015
+ *  Part of CSR uEnergy SDK 2.4.5
+ *  Application version 2.4.5.0
+ *
+ * FILE
+ *     app_gatt_db.db
+ *
+ *  DESCRIPTION
+ *      This file defines the application ATT data base in JSON format.
+ *      This file is taken as input by gattdbgen tool to produce ATT 
+ *      flat data base. 
+ *
+ *****************************************************************************/
+
+#include "gap_service_db.db"
+#include "gatt_service_db.db"
+#include "eh_smart_home_db.db"

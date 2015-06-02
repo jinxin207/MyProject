@@ -1,0 +1,57 @@
+<project buildenvironment="{067c869e-5bd9-4595-9f4c-60348133ad8e}" buildenvironmentname="uEnergy" executionenvironmentoption="XAP2+ P0 ELF DWARF BINUTILS UENERGYSDK" buildenvironmentoption="UENERGYSDK" executionenvironmentname="uEnergy" name="uEnergy" executionenvironment="{39e65239-59f4-4d78-b84a-26eaebfaa4de}" >
+ <folder name="C Files" >
+  <extension name="c" />
+  <file path="nvm_access.c" />
+  <file path="battery_service_data.c" />
+  <file path="dev_info_service_data.c" />
+  <file path="debug_interface.c" />
+  <file path="gap_access.c" />
+  <file path="gatt_access.c" />
+  <file path="gatt_client.c" />
+ </folder>
+ <folder name="Header Files" >
+  <extension name="h" />
+  <file path="dev_info_service_data.h" />
+  <file path="battery_uuids.h" />
+  <file path="dev_info_uuids.h" />
+  <file path="gap_conn_params.h" />
+  <file path="nvm_access.h" />
+  <file path="user_config.h" >
+   <properties>
+    <configuration name="Debug" />
+   </properties>
+  </file>
+  <file path="battery_service_data.h" />
+  <file path="debug_interface.h" />
+  <file path="gap_access.h" />
+  <file path="gatt_access.h" />
+  <file path="gatt_client.h" />
+ </folder>
+ <folder name="Assembler Files" >
+  <extension name="asm" />
+ </folder>
+ <folder name="GATT db files" >
+  <extension name="db" />
+ </folder>
+ <file path="gatt_client_csr101x_A05.keyr" />
+ <properties currentconfiguration="Debug" >
+  <configuration name="Debug" >
+   <property key="csr101x_a05_keyr" >gatt_client_csr101x_A05.keyr</property>
+   <property key="debugtransport" ></property>
+   <property key="defines" ></property>
+   <property key="hw_version" >0</property>
+   <property key="libs" ></property>
+   <property key="master_db" >app_gatt_db.db</property>
+   <property key="output" ></property>
+  </configuration>
+  <configuration name="Release" >
+   <property key="csr101x_a05_keyr" >gatt_client_csr101x_A05.keyr</property>
+   <property key="debugtransport" ></property>
+   <property key="defines" ></property>
+   <property key="hw_version" >0</property>
+   <property key="libs" ></property>
+   <property key="master_db" >app_gatt_db.db</property>
+   <property key="output" ></property>
+  </configuration>
+ </properties>
+</project>
