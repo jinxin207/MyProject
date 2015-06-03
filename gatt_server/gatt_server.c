@@ -45,6 +45,7 @@
 #include "gap_service.h"    /* GAP service interface */
 #include "gatt_uuid.h"
 #include "tea.h"
+#include "smart_home.h"
 /*============================================================================*
  *  Private Definitions
  *============================================================================*/
@@ -1640,8 +1641,9 @@ extern void SetState(app_state new_state)
                  * address.
                  */
                  
-                GattStartAdverts(20, 0);	///fast adver for 20 seconds
-		//StartScan(TRUE);
+                //GattStartAdverts(20, 0);	///fast adver for 20 seconds
+                //GattStartAdverts(0, 0xff);
+		StartScan(TRUE);
                 /* Indicate advertising mode by sounding two short beeps */
                 SoundBuzzer(buzzer_beep_twice);
             }
@@ -1901,22 +1903,8 @@ extern void AppPowerOnReset(void)
      */
 }
 
-uint32 SmartClientUUID = 0;
-uint16 SmartClientGROUP = 0;
-uint16 SmartClientADTYPE = 0;
-uint16 SmartClientDataType = 0;
-uint8 SmartClientData[6] ={0};
-uint16 RandSeedClient = 0;
 
-#define SWAP_WORD16(x) (((x>>8)&0x00ff) + ((x<<8) & 0xff00))
-static uint32 WORD16_TO_WORD32(uint16 x, uint16 y)
-{
-	uint32 r = 0;
-	r = SWAP_WORD16(x);
-	r <<= 16;
-	r += SWAP_WORD16(y);
-	return r;
-}
+Smart_Data_Struct SmartHomeClientIndx;
 
 static void appGattSignalLmAdvertisingReport(
                                        LM_EV_ADVERTISING_REPORT_T *p_event_data)
@@ -1935,21 +1923,21 @@ static void appGattSignalLmAdvertisingReport(
         if((size == 0x0004))
 	{		///128 bits UUID get
 		uint8 i =0;
-		SmartClientUUID = WORD16_TO_WORD32(data[0], data[1]);
+		SmartHomeClientIndx.SmartUUID = WORD16_TO_WORD32(data[0], data[1]);
 	    
 		size = GapLsFindAdType(&p_event_data->data, 
                                AD_TYPE_SERVICE_UUID_128BIT, 
                                data,
                                ADVSCAN_MAX_PAYLOAD);
 
-		SmartClientADTYPE = SWAP_WORD16(data[2]);
-		SmartClientGROUP = SWAP_WORD16(data[3]);
-		SmartClientDataType = SWAP_WORD16(data[4]);
+		SmartHomeClientIndx.SmartADDR = SWAP_WORD16(data[2]);
+		SmartHomeClientIndx.SmartGRUOP = SWAP_WORD16(data[3]);
+		SmartHomeClientIndx.SmartDataType = SWAP_WORD16(data[4]);
 
 		for(i=0; i<3; i++)
 		{
-			SmartClientData[2*i] = WORD_LSB(data[i+5]);
-			SmartClientData[2*i + 1] = WORD_MSB(data[i+5]);
+			SmartHomeClientIndx.SmartDATA[2*i] = WORD_LSB(data[i+5]);
+			SmartHomeClientIndx.SmartDATA[2*i + 1] = WORD_MSB(data[i+5]);
 		}
 
 		size = GapLsFindAdType(&p_event_data->data, 
@@ -1957,27 +1945,27 @@ static void appGattSignalLmAdvertisingReport(
                                data,
                                ADVSCAN_MAX_PAYLOAD);
 
-		RandSeedClient = SWAP_WORD16(data[0]);
+		SmartHomeClientIndx.Random = SWAP_WORD16(data[0]);
 
 		#ifdef DEBUG_OUTPUT_ENABLED
 		DebugIfWriteString("scan result, uuid= ");
-		DebugIfWriteUint32(SmartClientUUID);
+		DebugIfWriteUint32(SmartHomeClientIndx.SmartUUID);
 		DebugIfWriteString(", adtype=");
-		DebugIfWriteUint16(SmartClientADTYPE);
+		DebugIfWriteUint16(SmartHomeClientIndx.SmartADDR);
 		DebugIfWriteString(", group=");
-		DebugIfWriteUint16(SmartClientGROUP);
+		DebugIfWriteUint16(SmartHomeClientIndx.SmartGRUOP);
 		DebugIfWriteString(", dataType=");
-		DebugIfWriteUint16(SmartClientDataType);
+		DebugIfWriteUint16(SmartHomeClientIndx.SmartDataType);
 		DebugIfWriteString(", data=");
 		for(i=0; i<6; i++)
-			DebugIfWriteUint8(SmartClientData[i]);
+			DebugIfWriteUint8(SmartHomeClientIndx.SmartDATA[i]);
 		DebugIfWriteString(", randseed=");
-		DebugIfWriteUint16(RandSeedClient);
+		DebugIfWriteUint16(SmartHomeClientIndx.Random);
 		
 		DebugIfWriteString("\r\n");
 		#endif
 
-		if(SmartClientUUID == 0xf0140439)
+		if(SmartHomeClientIndx.SmartUUID == 0xf0140439)
 		{
 			SoundBuzzer(buzzer_beep_short);
 		}
@@ -2077,7 +2065,6 @@ extern void AppInit(sleep_state last_sleep_state)
     p_gatt_db = GattGetDatabase(&gatt_db_length);
 
     GattAddDatabaseReq(gatt_db_length, p_gatt_db);
-
 
 	#if 0
 	{

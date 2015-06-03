@@ -133,3 +133,15 @@ extern uint16 decrypt(uint8 *src,uint16 size_src,uint8 *key)
     return size_src;  
 }  
 
+
+
+
+extern uint32 WORD16_TO_WORD32(uint16 x, uint16 y)
+{
+	uint32 r = 0;
+	r = SWAP_WORD16(x);
+	r <<= 16;
+	r += SWAP_WORD16(y);
+	return r;
+}
+

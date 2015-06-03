@@ -35,6 +35,7 @@
 #include "appearance.h"     /* Macros for commonly used appearance values */
 #include "gap_service.h"    /* GAP Service interface */
 #include "eh_smart_service.h"
+#include "smart_home.h"
 #include "random.h"
 /*============================================================================*
  *  Private Definitions
@@ -53,13 +54,7 @@
 /* Length of Tx Power prefixed with 'Tx Power' AD Type */
 #define TX_POWER_VALUE_LENGTH                             (2)
 
-
-uint32 SmartUUID = 0xf0140439;
-uint16 SmartGROUP = 0x1101;
-uint16 SmartADTYPE = 0x0001;
-uint16 SmartDataType = 0x4001;
-uint8 SmartData[6] ={0x44, 0x55, 0x66, 0x77, 0x88, 0x99};
-uint16 RandSeed = 0;
+Smart_Data_Struct SmartHomeIndx;
 
 #define EH_W32_0(x) (x & 0xff)
 #define WORD32_4SB(_val)              ( ((_val) & 0xff000000) >> 24 )
@@ -89,24 +84,23 @@ static void gattSetAdvertParams(uint8 fast_connection);
 static uint8 InitRandData(uint8* buf)
 {
 	uint8 i = 0;
-	RandSeed = Random16();
+	SmartHomeIndx.Random = Random16();
 	buf[i++] = AD_TYPE_SERVICE_UUID_16BIT;
-	buf[i++] = WORD_MSB(RandSeed);
-	buf[i++] = WORD_LSB(RandSeed);
+	buf[i++] = WORD_MSB(SmartHomeIndx.Random);
+	buf[i++] = WORD_LSB(SmartHomeIndx.Random);
 
 	return i;
 }
 
 static uint8 InitUUID32Data(uint8* buf)
 {
-	
 	uint8 i = 0;
 
 	buf[i++] = AD_TYPE_SERVICE_UUID_32BIT;
-	buf[i++] = WORD32_4SB(SmartUUID);
-	buf[i++] = WORD32_3SB(SmartUUID);
-	buf[i++] = WORD32_2SB(SmartUUID);
-	buf[i++] = WORD32_1SB(SmartUUID);
+	buf[i++] = WORD32_4SB(SmartHomeIndx.SmartUUID);
+	buf[i++] = WORD32_3SB(SmartHomeIndx.SmartUUID);
+	buf[i++] = WORD32_2SB(SmartHomeIndx.SmartUUID);
+	buf[i++] = WORD32_1SB(SmartHomeIndx.SmartUUID);
 
 	return i;
 }
@@ -119,30 +113,30 @@ extern uint8 BuildEhongSmartData(uint8* buf)
 	buf[i++] = AD_TYPE_SERVICE_UUID_128BIT;			////used for data
 
 	/////smart uuid
-	buf[i++] = WORD32_4SB(SmartUUID);
-	buf[i++] = WORD32_3SB(SmartUUID);
-	buf[i++] = WORD32_2SB(SmartUUID);
-	buf[i++] = WORD32_1SB(SmartUUID);
+	buf[i++] = WORD32_4SB(SmartHomeIndx.SmartUUID);
+	buf[i++] = WORD32_3SB(SmartHomeIndx.SmartUUID);
+	buf[i++] = WORD32_2SB(SmartHomeIndx.SmartUUID);
+	buf[i++] = WORD32_1SB(SmartHomeIndx.SmartUUID);
 
 	/////smart adver type
-	buf[i++] = WORD_MSB(SmartADTYPE);
-	buf[i++] = WORD_LSB(SmartADTYPE);
+	buf[i++] = WORD_MSB(SmartHomeIndx.SmartADDR);
+	buf[i++] = WORD_LSB(SmartHomeIndx.SmartADDR);
 	
 	/////smart group
-	buf[i++] = WORD_MSB(SmartGROUP);
-	buf[i++] = WORD_LSB(SmartGROUP);
+	buf[i++] = WORD_MSB(SmartHomeIndx.SmartGRUOP);
+	buf[i++] = WORD_LSB(SmartHomeIndx.SmartGRUOP);
 
 	/////smart DATA TYPE
-	buf[i++] = WORD_MSB(SmartDataType);
-	buf[i++] = WORD_LSB(SmartDataType);
+	buf[i++] = WORD_MSB(SmartHomeIndx.SmartDataType);
+	buf[i++] = WORD_LSB(SmartHomeIndx.SmartDataType);
 
 	/////smart DATA value
-	buf[i++] = SmartData[0];
-	buf[i++] = SmartData[1];
-	buf[i++] = SmartData[2];
-	buf[i++] = SmartData[3];
-	buf[i++] = SmartData[4];
-	buf[i++] = SmartData[5];
+	buf[i++] = SmartHomeIndx.SmartDATA[0];
+	buf[i++] = SmartHomeIndx.SmartDATA[1];
+	buf[i++] = SmartHomeIndx.SmartDATA[2];
+	buf[i++] = SmartHomeIndx.SmartDATA[3];
+	buf[i++] = SmartHomeIndx.SmartDATA[4];
+	buf[i++] = SmartHomeIndx.SmartDATA[5];
 
 	return i;
 }
@@ -178,7 +172,7 @@ static void gattSetAdvertParams(uint8 adv_speed)
 	else if(adv_speed == 0xff)
 	{
 		adv_interval_min = SLOW_INTERVAL_MIN;
-	    adv_interval_max = SLOW_INTERVAL_MIN;
+	    	adv_interval_max = SLOW_INTERVAL_MIN;
 	}
 	else
 	{
@@ -251,13 +245,24 @@ static void gattSetAdvertParams(uint8 adv_speed)
  *
  *  PARAMETERS
  *      None
- *
  *  RETURNS
  *      Nothing
  *----------------------------------------------------------------------------*/
 extern void InitGattData(void)
 {
-   
+   	SmartHomeIndx.SmartUUID = 0xf0140439;
+	SmartHomeIndx.SmartGRUOP = 0x1101;
+	SmartHomeIndx.SmartADDR = 0x0101;
+	SmartHomeIndx.SmartDataType = 0x4001;
+	SmartHomeIndx.SmartDATA[0] = 0x44;
+	SmartHomeIndx.SmartDATA[1] = 0x45;
+	SmartHomeIndx.SmartDATA[2] = 0x46;
+	SmartHomeIndx.SmartDATA[3] = 0x47;
+	SmartHomeIndx.SmartDATA[4] = 0x48;
+	SmartHomeIndx.SmartDATA[5] = 0x49;
+
+	SmartHomeIndx.Random = 0;
+	
 }
 
 /*----------------------------------------------------------------------------*
