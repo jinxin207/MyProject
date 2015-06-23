@@ -7,7 +7,6 @@
 *                           函数 
 **********************************************************************/  
 #define SWAP_WORD16(x) (((x>>8)&0x00ff) + ((x<<8) & 0xff00))
-
   
 /********************************************************************* 
 *                           加密算法 
@@ -17,8 +16,8 @@
 *返回:密文的字节数 
 **********************************************************************/  
   
-extern uint16 encrypt(uint8 *src,uint16 size_src,uint8 *key);  
-  
+extern void encrypt(uint8 *src,uint16 size_src,uint8 *key);  
+
 /********************************************************************* 
 *                           解密算法 
 *参数:src:源数据,所占空间必须为8字节的倍数.解密完成后明文也存放在这 
@@ -26,10 +25,19 @@ extern uint16 encrypt(uint8 *src,uint16 size_src,uint8 *key);
 *     key:密钥,16字节 
 *返回:明文的字节数,如果失败,返回0 
 **********************************************************************/  
-  
-extern uint16 decrypt(uint8 *src,uint16 size_src,uint8 *key);  
 
+extern void decrypt(uint8 *src,uint16 size_src,uint8 *key);  
+
+extern void KeyConvert(uint16 k, uint8* key);
 
 extern uint32 WORD16_TO_WORD32(uint16 x, uint16 y);
+
+extern uint16 BYTE8_TO_WORD16(uint8 x, uint8 y);
+
+
+#define ENCRP_TEA 1
+
+
+
 
 #endif  /*__TEA_h__*/

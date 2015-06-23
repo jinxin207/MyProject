@@ -36,7 +36,10 @@
 #include "gap_service.h"    /* GAP Service interface */
 #include "eh_smart_service.h"
 #include "smart_home.h"
+#include "tea.h"
 #include "random.h"
+
+#include "debug_interface.h"
 /*============================================================================*
  *  Private Definitions
  *============================================================================*/
@@ -110,6 +113,7 @@ static uint8 InitUUID32Data(uint8* buf)
 extern uint8 BuildEhongSmartData(uint8* buf)
 {
 	uint8 i =0 ;
+	uint8 KEY[16] = {0};
 	buf[i++] = AD_TYPE_SERVICE_UUID_128BIT;			////used for data
 
 	/////smart uuid
@@ -138,6 +142,22 @@ extern uint8 BuildEhongSmartData(uint8* buf)
 	buf[i++] = SmartHomeIndx.SmartDATA[4];
 	buf[i++] = SmartHomeIndx.SmartDATA[5];
 
+	#if defined ENCRP_TEA
+	KeyConvert(SmartHomeIndx.Random, KEY);
+	encrypt(buf+1, 16, KEY);
+
+	{
+		uint8 j=0;
+		DebugIfWriteString("After encryp = ");
+		for(j=0; j<16; j++)
+		{
+			DebugIfWriteUint8(buf[1+j]);
+			DebugIfWriteString(", ");
+		}
+		DebugIfWriteString("\r\n");
+	}
+	#endif
+	
 	return i;
 }
 
@@ -208,7 +228,7 @@ static void gattSetAdvertParams(uint8 adv_speed)
 	    ReportPanic(app_panic_set_scan_rsp_data);
 	}
 
-	length = BuildEhongSmartData(advert_data);
+	 length = InitUUID32Data(advert_data);
 	 if (LsStoreAdvScanData(length, advert_data, 
 	                    ad_src_advertise) != ls_err_none)
 	{
@@ -221,8 +241,8 @@ static void gattSetAdvertParams(uint8 adv_speed)
 	{
 	    ReportPanic(app_panic_set_advert_data);
 	}
-
-	 length = InitUUID32Data(advert_data);
+	 
+	length = BuildEhongSmartData(advert_data);
 	 if (LsStoreAdvScanData(length, advert_data, 
 	                    ad_src_advertise) != ls_err_none)
 	{

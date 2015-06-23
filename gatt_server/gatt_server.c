@@ -1924,12 +1924,66 @@ static void appGattSignalLmAdvertisingReport(
 	{		///128 bits UUID get
 		uint8 i =0;
 		SmartHomeClientIndx.SmartUUID = WORD16_TO_WORD32(data[0], data[1]);
-	    
+
+		if(SmartHomeClientIndx.SmartUUID != 0xf0140439)		///if not the service uuid
+			return;
+
+		size = GapLsFindAdType(&p_event_data->data, 
+                               AD_TYPE_SERVICE_UUID_16BIT, 
+                               data,
+                               ADVSCAN_MAX_PAYLOAD);
+        
+		SmartHomeClientIndx.Random = SWAP_WORD16(data[0]);
+		
+	
 		size = GapLsFindAdType(&p_event_data->data, 
                                AD_TYPE_SERVICE_UUID_128BIT, 
                                data,
                                ADVSCAN_MAX_PAYLOAD);
 
+		
+		#if defined ENCRP_TEA
+		{
+	uint8 KEY[16] = {0};
+	uint8 DesData[16] ={0};
+	KeyConvert(SmartHomeClientIndx.Random, KEY);
+	
+		for(i=0; i<8; i++)
+		{
+			DesData[i*2] = WORD_LSB(data[i]);
+			DesData[i*2 + 1] = WORD_MSB(data[i]);
+		}
+		
+		DebugIfWriteString("before dec = ");
+		for(i=0; i<16; i++)
+		{
+			DebugIfWriteUint8(DesData[i]);
+			DebugIfWriteString(", ");
+			
+		}
+
+		decrypt(DesData, 16, KEY);
+
+		
+		DebugIfWriteString("After dec = ");
+		for(i=0; i<16; i++)
+		{
+			DebugIfWriteUint8(DesData[i]);
+			DebugIfWriteString(", ");
+			
+		}
+		DebugIfWriteString("\r\n");
+
+	
+		SmartHomeClientIndx.SmartADDR = BYTE8_TO_WORD16(DesData[4], DesData[5]);
+		SmartHomeClientIndx.SmartGRUOP = BYTE8_TO_WORD16(DesData[6], DesData[7]);
+		SmartHomeClientIndx.SmartDataType = BYTE8_TO_WORD16(DesData[8], DesData[9]);
+		for(i=0; i<6; i++)
+		{
+			SmartHomeClientIndx.SmartDATA[i] = DesData[i+10];
+		}
+			}
+		#else
 		SmartHomeClientIndx.SmartADDR = SWAP_WORD16(data[2]);
 		SmartHomeClientIndx.SmartGRUOP = SWAP_WORD16(data[3]);
 		SmartHomeClientIndx.SmartDataType = SWAP_WORD16(data[4]);
@@ -1940,12 +1994,7 @@ static void appGattSignalLmAdvertisingReport(
 			SmartHomeClientIndx.SmartDATA[2*i + 1] = WORD_MSB(data[i+5]);
 		}
 
-		size = GapLsFindAdType(&p_event_data->data, 
-                               AD_TYPE_SERVICE_UUID_16BIT, 
-                               data,
-                               ADVSCAN_MAX_PAYLOAD);
-
-		SmartHomeClientIndx.Random = SWAP_WORD16(data[0]);
+		#endif
 
 		#ifdef DEBUG_OUTPUT_ENABLED
 		DebugIfWriteString("scan result, uuid= ");
@@ -2066,14 +2115,14 @@ extern void AppInit(sleep_state last_sleep_state)
 
     GattAddDatabaseReq(gatt_db_length, p_gatt_db);
 
-	#if 0
+	#if 1
 	{
 		uint8 i =0;
-		uint8 KEY[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-		uint8 SrcData[16] = {0x11,0x23,0x11,0x11,0x11,0x11,
-			0x11,0x11,0x11,0x11,0x11,0x11,0x11,0x11,0x11,0x11};
+		uint8 KEY[16] = {0};
+		uint8 SrcData[16] = {0xf0,0x14,0x04,0x39,0x01,0x01,
+			0x11,0x01,0x40,0x01,0x44,0x45,0x46,0x47,0x48,0x49};
 		
-		 
+		 KeyConvert(0x00a2, KEY);
 		encrypt(SrcData, 16, KEY);
 		DebugIfWriteString("After enc = ");
 		for(i=0; i<16; i++)
